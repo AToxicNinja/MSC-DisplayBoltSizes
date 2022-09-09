@@ -18,7 +18,7 @@ namespace DisplayBoltSize
         public override string ID => "DisplayBoltSize"; //Your mod ID (unique)
         public override string Name => "Display Bolt Size"; //You mod name
         public override string Author => "AToxicNinja"; //Your Username
-        public override string Version => "1.0"; //Version
+        public override string Version => "1.1"; //Version
         public override string Description => "Display the size of the bolt/required wrench size, or if the wrench is too large, or too small. Re-written/taken from Lex's Show Bolt Size remake of wolf_vx's mod. Thats a mouthful."; //Short description of your mod
         public override bool UseAssetsFolder => false;
 
@@ -106,15 +106,17 @@ namespace DisplayBoltSize
             List<Settings> testSettings = Settings.Get( this );
             foreach( Settings setting in testSettings )
             {
-                if( setting.ID == "boltSizingList" )
+                if( setting.ID == "boltSizingList" && setting.Value != null )
                 {
-                    switch( setting.Value )
+                    // We know this value should be an int, so we will convert to it
+                    int actualVal = Convert.ToInt16( setting.Value );
+                    switch( actualVal )
                     {
                         case 2:
                             sizingMode = SizingMode.DirectionDescriptive;
                             break;
                         case 1:
-                            sizingMode = SizingMode.Direction;
+                            sizingMode = SizingMode.DirectionDescriptive;
                             break;
                         case 0:
                         default:
@@ -154,7 +156,14 @@ namespace DisplayBoltSize
             int currentWrenchSize = Mathf.RoundToInt( toolWrenchSize.Value * 10f );
 
             // Get bolt sizing
-            int currentBoltSize = Mathf.RoundToInt( boltSize.Value * 10f );
+            float _tempBoltSize = boltSize.Value * 10f;
+            if( _tempBoltSize == 6.5f )
+            {
+                // This isn't a bolt/nut, it is a screw and needs screwdriver
+                return;
+            }
+
+            int currentBoltSize = Mathf.RoundToInt( _tempBoltSize );
 
             if( currentWrenchSize == currentBoltSize )
             {
